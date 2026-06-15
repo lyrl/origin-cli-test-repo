@@ -1,3 +1,7 @@
+import argparse
+import json
+import sys
+
 import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass, field
@@ -49,3 +53,32 @@ def parse_page(url: str, html: str) -> PageData:
 def scrape(url: str, timeout: int = 10) -> PageData:
     html = fetch_html(url, timeout=timeout)
     return parse_page(url, html)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Scrape a webpage")
+    parser.add_argument("url", help="URL to scrape")
+    parser.add_argument("--timeout", type=int, default=10, help="Request timeout in seconds (default: 10)")
+    parser.add_argument("--links", action="store_true", help="Print extracted links")
+    parser.add_argument("--json", action="store_true", help="Output as JSON")
+    args = parser.parse_args()
+
+    try:
+        page = scrape(args.url, timeout=args.timeout)
+    except ScraperError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if args.json:
+        print(json.dumps({"url": page.url, "title": page.title, "links": page.links, "text": page.text}, ensure_ascii=False, indent=2))
+    elif args.links:
+        for link in page.links:
+            print(link)
+    else:
+        print(f"Title: {page.title}")
+        print(f"Links: {len(page.links)}")
+        print(f"Text:  {page.text[:200]}...")
+
+
+if __name__ == "__main__":
+    main()
