@@ -16,3 +16,14 @@ class PageData:
     text: str = ""
 
 
+@dataclass
+class PageData:
+    url: str
+    title: str
+    links: list[str] = field(default_factory=list)
+    text: str = ""@dataclass
+class PageData:
+    url: str
+    title: str
+    links: list[str] = field(default_factory=list)
+    text: str = ""
